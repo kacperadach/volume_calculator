@@ -1,7 +1,6 @@
 from __future__ import division
 
 import datetime
-import time as t
 import locale
 
 locale.setlocale(locale.LC_ALL, 'US')
@@ -14,8 +13,8 @@ close = datetime.time(hour=16, minute=0)
 trading_day_length = (6 * 60) + 30
 
 
-
 class VolumeCalculator(tk.Tk):
+
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.clock = tk.Label(self, text="")
@@ -30,33 +29,30 @@ class VolumeCalculator(tk.Tk):
         self.stock_object = Share('UNXL')
         self.avg_volume = self.stock_object.get_avg_daily_volume()
         self.volume = self.stock_object.get_volume()
-        self.ASSUMED_TIME = datetime.time(hour=10, minute=0)
-
+        #self.ASSUMED_TIME = datetime.time(hour=10, minute=0)
         self.update()
 
     def calculate_eod_volume(self, volume, time):
-        diff_hour = self.ASSUMED_TIME.hour-open.hour
-        diff_min = self.ASSUMED_TIME.minute-open.minute
+        diff_hour = time.hour-open.hour
+        diff_min = time.minute-open.minute
         diff_time_length = (diff_hour * 60) + diff_min
         eod_volume = str((1 / (float(diff_time_length) / float(trading_day_length))) * volume).split('.')[0]
-        self.ASSUMED_TIME = datetime.time(hour=10, minute=self.ASSUMED_TIME.minute+1)
         eod_volume = locale.format("%d", int(eod_volume), grouping=True)
         return eod_volume
 
     def update(self):
-
         dt = datetime.datetime.now()
         now = datetime.time(hour=dt.hour, minute=dt.minute)
-        #if now > open and now < close:
-        if True:
+        if now > open and now < close:
+        #if True:
             self.status.configure(text="Calculating Volume")
             volume = int(self.stock_object.get_volume())
             self.display.configure(text=self.calculate_eod_volume(volume, now))
         else:
             self.status.configure(text="Not Calculating Volume")
-            self.display.configure(text=self.volume)
+            self.display.configure(text=locale.format("%d", int(self.volume), grouping=True))
 
-        now = t.strftime("%H:%M:%S", t.gmtime())
+        now = str(datetime.datetime.now().time()).split('.')[0]
         self.clock.configure(text=now)
         self.after(1000, self.update)
 
